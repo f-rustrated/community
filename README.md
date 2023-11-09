@@ -2,4 +2,6 @@
 - Rust Community 
 
 # How to run 
-- run `cargo run` command 
+```sh
+cargo run --bin web
+```
