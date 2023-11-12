@@ -3,16 +3,16 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use community::domain::{commands::CreateUser, models::User};
+use community::domains::{commands::CreateAccount, models::Account};
 
-pub async fn create_user(Json(payload): Json<CreateUser>) -> (StatusCode, Json<User>) {
-    let user = User {
-        id: 1337,
-        username: payload.username,
-    };
+// pub async fn create_account(Json(payload): Json<CreateAccount>) -> (StatusCode, Json<Account>) {
+//     let account = Account {
+//         id: 1337,
+//         accountname: payload.accountname,
+//     };
 
-    (StatusCode::CREATED, Json(user))
-}
+//     (StatusCode::CREATED, Json(account))
+// }
 
 // basic handler that responds with a static string
 pub async fn root() -> &'static str {
@@ -20,7 +20,6 @@ pub async fn root() -> &'static str {
 }
 
 pub fn router() -> Router {
-    Router::new()
-        .route("/", get(root))
-        .route("/users", post(create_user))
+    Router::new().route("/", get(root))
+    // .route("/accounts", post(create_account))
 }
