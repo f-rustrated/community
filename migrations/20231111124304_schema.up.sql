@@ -1,104 +1,115 @@
+
+CREATE TYPE account_status AS ENUM (
+    'active', 'deleted', 'abnormal'
+
+);
+
 -- Add up migration script here
-create table if not exists public."user"
+CREATE TABLE IF NOT EXISTS public.account
 (
-    id         bigserial
-        primary key,
+    id         bigserial primary key,
     uuid       uuid                                not null,
-    name       varchar(100)                        not null,
-    status     char      default 'N'::bpchar       not null,
-    password   varchar(255)                        not null,
+    name       text                                not null,
+    status     account_status    DEFAULT 'normal'  not null,
+    hashed_password   text                                not null,
     created_at timestamp default CURRENT_TIMESTAMP not null,
     updated_at timestamp default CURRENT_TIMESTAMP not null
 );
 
-comment on column public."user".uuid is 'public id to uniquely identify a user';
+comment on column public.account.uuid is 'public id to uniquely identify a account';
 
-comment on column public."user".name is 'user name';
+comment on column public.account.name is 'account name';
 
-comment on column public."user".status is 'N: normal, D: deleted, A: abnormal';
+comment on column public.account.status is 'N: normal, D: deleted, A: abnormal';
 
-create unique index uidx_user_uuid
-    on public."user" (uuid);
+create unique index uidx_account_uuid
+    on public.account (uuid);
 
-create unique index uidx_user_name
-    on public."user" (name);
+create unique index uidx_account_name
+    on public.account (name);
 
-create table if not exists public.notification
-(
-    id             bigserial
-        primary key,
-    target_user_id bigint                              not null,
-    type           char                                not null,
-    body           json                                not null,
-    view_yn        char      default 'N'::bpchar       not null,
-    created_at     timestamp default CURRENT_TIMESTAMP not null
+-- CREATE TABLE IF NOT EXISTS public.notification
+-- (
+--     id             bigserial
+--         primary key,
+--     target_account_id bigint                              not null,
+--     type           char                                not null,
+--     body           json                                not null,
+--     view_yn        char      default 'N'::bpchar       not null,
+--     created_at     timestamp default CURRENT_TIMESTAMP not null
+-- );
+
+-- comment on column public.notification.target_account_id is 'the target account to send notification to';
+
+-- comment on column public.notification.type is 'the type of notification e.g. C: Someone replied with comment';
+
+-- comment on column public.notification.body is 'the main data of the notification';
+
+-- comment on column public.notification.view_yn is 'whether the account has viewd the notification(Y/N)';
+
+-- create index idx_target_account_id
+--     on public.notification (target_account_id);
+
+
+CREATE TYPE post_category AS ENUM(
+    'default', 'knowledge'
+)
+
+CREATE TYPE post_status AS ENUM (
+    'created', 'deleted' , 'edited'
 );
 
-comment on column public.notification.target_user_id is 'the target user to send notification to';
-
-comment on column public.notification.type is 'the type of notification e.g. C: Someone replied with comment';
-
-comment on column public.notification.body is 'the main data of the notification';
-
-comment on column public.notification.view_yn is 'whether the user has viewd the notification(Y/N)';
-
-create index idx_target_user_id
-    on public.notification (target_user_id);
-
-create table if not exists public.post
+CREATE TABLE IF NOT EXISTS public.post
 (
-    id         bigserial
-        primary key,
-    user_id    bigint                                           not null,
-    title      varchar(64)                                      not null,
-    subtitle   varchar(100),
-    image_url  varchar(100),
-    category   varchar(10) default 'DEFAULT'::character varying not null,
+    id         bigserial primary key,
+    account_id bigint                                           not null,
+    title      text                                             not null,
+    thumbnail  text                                                     ,
+    category   post_category default 'default'                  not null,
     body       text                                             not null,
-    type       varchar(10) default 'POST'::character varying    not null,
-    deleted_yn char        default 'N'::bpchar                  not null,
+    status     post_status default 'created'                    not null,
     created_at timestamp   default CURRENT_TIMESTAMP            not null,
     updated_at timestamp   default CURRENT_TIMESTAMP            not null
 );
 
-comment on column public.post.user_id is 'maps to user.id';
+comment on column public.post.account_id is 'maps to account.id';
 
-comment on column public.post.category is 'category of the post, e.g. DEFAULT, KNOWLEDGE, COMMUNITY, etc';
+comment on column public.post.category is 'category of the post, e.g. DEFAULT, KNOWLEDGE,  etc';
 
 comment on column public.post.type is 'type of the post, e.g. ARTICLE, LINK, etc';
 
 comment on column public.post.deleted_yn is 'whether the post is deleted (Y/N)';
 
-create table if not exists public.post_reaction
-(
-    post_id       bigint                              not null,
-    user_id       bigint                              not null,
-    reaction_type char                                not null,
-    created_at    timestamp default CURRENT_TIMESTAMP not null,
-    primary key (post_id, user_id)
-);
+-- CREATE TABLE IF NOT EXISTS public.post_reaction
+-- (
+--     post_id       bigint                              not null,
+--     account_id       bigint                              not null,
+--     reaction_type char                                not null,
+--     created_at    timestamp default CURRENT_TIMESTAMP not null,
+--     primary key (post_id, account_id)
+-- );
 
-comment on column public.post_reaction.reaction_type is 'L: Like, D: Dislike';
+-- comment on column public.post_reaction.reaction_type is 'L: Like, D: Dislike';
 
-create table if not exists public.post_statistic
-(
-    post_id       bigserial,
-    like_count    integer default 0 not null,
-    dislike_count integer default 0 not null,
-    comment_count integer default 0 not null
-);
+-- CREATE TABLE IF NOT EXISTS public.post_statistic
+-- (
+--     post_id       bigserial,
+--     like_count    integer default 0 not null,
+--     dislike_count integer default 0 not null,
+--     comment_count integer default 0 not null
+-- );
 
-comment on column public.post_statistic.like_count is 'number of likes';
+-- comment on column public.post_statistic.like_count is 'number of likes';
 
-comment on column public.post_statistic.dislike_count is 'number of dislikes';
+-- comment on column public.post_statistic.dislike_count is 'number of dislikes';
 
-comment on column public.post_statistic.comment_count is 'number of comments';
+-- comment on column public.post_statistic.comment_count is 'number of comments';
 
-create table if not exists public.comment
+CREATE TABLE IF NOT EXISTS public.comment
 (
     id          bigserial
         primary key,
-    user_id     bigserial,
+    account_id     bigserial,
     target_id   varchar(50)                         not null,
     target_type char                                not null,
     message     text                                not null,
@@ -119,27 +130,27 @@ comment on column public.comment.deleted_yn is 'whether the comment has been del
 create index idx_target_id_target_type
     on public.comment (target_id, target_type);
 
-create table if not exists public.comment_reaction
-(
-    comment_id    bigserial,
-    user_id       bigserial,
-    reaction_type char                                not null,
-    created_at    timestamp default CURRENT_TIMESTAMP not null,
-    primary key (comment_id, user_id)
-);
+-- CREATE TABLE IF NOT EXISTS public.comment_reaction
+-- (
+--     comment_id    bigserial,
+--     account_id       bigserial,
+--     reaction_type char                                not null,
+--     created_at    timestamp default CURRENT_TIMESTAMP not null,
+--     primary key (comment_id, account_id)
+-- );
 
-comment on column public.comment_reaction.reaction_type is 'L: LIKE, D: DISLIKE';
+-- comment on column public.comment_reaction.reaction_type is 'L: LIKE, D: DISLIKE';
 
-create table if not exists public.comment_statistic
-(
-    comment_id    bigserial,
-    like_count    integer default 0 not null,
-    dislike_count integer default 0 not null,
-    reply_count   integer default 0 not null
-);
+-- CREATE TABLE IF NOT EXISTS public.comment_statistic
+-- (
+--     comment_id    bigserial,
+--     like_count    integer default 0 not null,
+--     dislike_count integer default 0 not null,
+--     reply_count   integer default 0 not null
+-- );
 
-comment on column public.comment_statistic.like_count is 'number of likes';
+-- comment on column public.comment_statistic.like_count is 'number of likes';
 
-comment on column public.comment_statistic.dislike_count is 'number of dislikes';
+-- comment on column public.comment_statistic.dislike_count is 'number of dislikes';
 
-comment on column public.comment_statistic.reply_count is 'number of replies';
+-- comment on column public.comment_statistic.reply_count is 'number of replies';

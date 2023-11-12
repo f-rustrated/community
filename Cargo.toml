@@ -14,7 +14,9 @@ sqlx = "0.7.2"
 tokio = { version = "1.0", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
+uuid = {version="*" , features=["serde"]}
+chrono = {version="*", features=["serde"]}
+async-trait= "*"
 
 [[bin]]
 name = "web"

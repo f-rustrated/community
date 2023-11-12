@@ -9,4 +9,5 @@ drop table if exists public.post_reaction;
 drop table if exists public.post_statistic;
 drop table if exists public.post;
 
-drop table if exists public.user;
+drop table if exists public.account;
+drop type account_status;
