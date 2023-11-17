@@ -3,6 +3,7 @@ use serde::Serialize;
 use uuid::Uuid;
 
 use super::commands::CreateAccount;
+use super::commands::CreatePost;
 
 #[derive(Serialize)]
 pub struct Account {
@@ -41,6 +42,12 @@ pub struct CommunityPost {
     updated_at: DateTime<Utc>,
 }
 
+impl CommunityPost {
+    pub(crate) fn new(cmd: CreatePost) -> Self {
+        todo!()
+    }
+}
+
 #[derive(Serialize)]
 pub enum PostCategory {
     Default,
@@ -56,6 +63,7 @@ pub enum PostStatus {
 
 pub mod repositories {
     use super::Account;
+    use super::CommunityPost;
     use async_trait::async_trait;
 
     #[async_trait]
@@ -65,5 +73,14 @@ pub mod repositories {
         async fn add(&self, account: Account);
 
         async fn update(&self, account: Account);
+    }
+
+    #[async_trait]
+    pub trait CommunityPostRepository {
+        async fn get(&self, id: i64) -> CommunityPost;
+
+        async fn add(&self, account: CommunityPost);
+
+        async fn update(&self, account: CommunityPost);
     }
 }
