@@ -1,0 +1,3 @@
+- Where should we write function to create routers?
+    - `main.rs`: is it appropriate to initialize routers here?
+    - `adapters/routers/mod.rs`: have to import the `AppState`, then it will create circular dependencies between adapters and main.rs
