@@ -2,10 +2,10 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use axum::handler::Handler;
 use axum::Router;
-use axum::routing::get;
+use axum::routing::{get, post};
 use dotenv::dotenv;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-use community::adapters::routers::{root};
+use community::adapters::routers::{root, account::create_account};
 
 pub struct AppState {
     db: Pool<Postgres>,
@@ -43,5 +43,6 @@ async fn main() {
 
 pub fn create_router(app_state: Arc<AppState>) -> Router {
     Router::new().route("/", get(root))
+        .route("/account", post(create_account))
         .with_state(app_state)
 }

@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use uuid::Uuid;
 
 use super::commands::CreateAccount;
 
-#[derive(Serialize)]
+#[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct Account {
     id: i64,
     uuid: Uuid,
@@ -17,7 +18,15 @@ pub struct Account {
 
 impl Account {
     pub(crate) fn new(cmd: CreateAccount) -> Self {
-        todo!()
+        Self {
+            id: 0,
+            uuid: Uuid::new_v4(),
+            name: cmd.accountname,
+            status: AccountStatus::Active,
+            hashed_password: "".to_string(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
     }
 }
 

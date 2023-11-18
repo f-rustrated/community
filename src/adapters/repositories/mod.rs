@@ -1,4 +1,3 @@
-pub mod auth;
+pub mod account;
 pub mod post;
-
-struct SqlRepository {}
+pub struct SqlRepository {}
