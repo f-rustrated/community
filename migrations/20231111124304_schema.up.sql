@@ -1,19 +1,18 @@
-
-CREATE TYPE account_status AS ENUM (
+CREATE TYPE public.account_status AS ENUM (
     'active', 'deleted', 'abnormal'
 
-);
+    );
 
 -- Add up migration script here
 CREATE TABLE IF NOT EXISTS public.account
 (
-    id         bigserial primary key,
-    uuid       uuid                                not null,
-    name       text                                not null,
-    status     account_status    DEFAULT 'normal'  not null,
-    hashed_password   text                                not null,
-    created_at timestamp default CURRENT_TIMESTAMP not null,
-    updated_at timestamp default CURRENT_TIMESTAMP not null
+    id              bigserial primary key,
+    uuid            uuid                                     not null,
+    name            text                                     not null,
+    status          account_status DEFAULT 'active'          not null,
+    hashed_password text                                     not null,
+    created_at      timestamp      default CURRENT_TIMESTAMP not null,
+    updated_at      timestamp      default CURRENT_TIMESTAMP not null
 );
 
 comment on column public.account.uuid is 'public id to uniquely identify a account';
@@ -51,34 +50,31 @@ create unique index uidx_account_name
 --     on public.notification (target_account_id);
 
 
-CREATE TYPE post_category AS ENUM(
+CREATE TYPE public.post_category AS ENUM (
     'default', 'knowledge'
-)
+    );
 
-CREATE TYPE post_status AS ENUM (
+CREATE TYPE public.post_status AS ENUM (
     'created', 'deleted' , 'edited'
-);
+    );
 
 CREATE TABLE IF NOT EXISTS public.post
 (
     id         bigserial primary key,
-    account_id bigint                                           not null,
-    title      text                                             not null,
-    thumbnail  text                                                     ,
-    category   post_category default 'default'                  not null,
-    body       text                                             not null,
-    status     post_status default 'created'                    not null,
-    created_at timestamp   default CURRENT_TIMESTAMP            not null,
-    updated_at timestamp   default CURRENT_TIMESTAMP            not null
+    account_id bigint                                  not null,
+    title      text                                    not null,
+    thumbnail  text,
+    category   post_category default 'default'         not null,
+    body       text                                    not null,
+    status     post_status   default 'created'         not null,
+    created_at timestamp     default CURRENT_TIMESTAMP not null,
+    updated_at timestamp     default CURRENT_TIMESTAMP not null
 );
 
 comment on column public.post.account_id is 'maps to account.id';
 
 comment on column public.post.category is 'category of the post, e.g. DEFAULT, KNOWLEDGE,  etc';
 
-comment on column public.post.type is 'type of the post, e.g. ARTICLE, LINK, etc';
-
-comment on column public.post.deleted_yn is 'whether the post is deleted (Y/N)';
 
 -- CREATE TABLE IF NOT EXISTS public.post_reaction
 -- (
@@ -109,7 +105,7 @@ CREATE TABLE IF NOT EXISTS public.comment
 (
     id          bigserial
         primary key,
-    account_id     bigserial,
+    account_id  bigserial,
     target_id   varchar(50)                         not null,
     target_type char                                not null,
     message     text                                not null,

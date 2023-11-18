@@ -1,7 +1,5 @@
 use std::net::SocketAddr;
-
-use crate::routers::router;
-mod routers;
+use community::adapters::routers::router;
 
 #[tokio::main]
 async fn main() {
