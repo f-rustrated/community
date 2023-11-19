@@ -15,11 +15,11 @@ pub enum AccountStatus {
 
 #[derive(Serialize)]
 pub struct Account {
-    id: i64,
-    uuid: Uuid,
-    name: String,
+    pub id: i64,
+    pub uuid: Uuid,
+    pub name: String,
     status: AccountStatus,
-    hashed_password: String,
+    pub hashed_password: String,
     created_at: DateTime<Utc>,
     updated_at: DateTime<Utc>,
 }
