@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 
 use crate::{
-    domains::auth::Account,
-    services::{auth::repository::AccountRepository, cross_cutting_traits::TransactionUnitOfWork},
+    domains::account::Account,
+    services::{
+        account::repository::AccountRepository, cross_cutting_traits::TransactionUnitOfWork,
+    },
 };
 
 use super::SqlRepository;

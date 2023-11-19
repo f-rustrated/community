@@ -1,6 +1,6 @@
 use super::repository::AccountRepository;
 use crate::{
-    domains::auth::{
+    domains::account::{
         commands::{CreateAccount, SignInAccount},
         Account,
     },
