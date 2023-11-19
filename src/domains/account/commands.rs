@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct CreateAccount {
-    pub accountname: String,
+    pub account_name: String,
 }
 
 pub struct SignInAccount {

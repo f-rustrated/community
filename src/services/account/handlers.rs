@@ -4,7 +4,7 @@ use crate::{
         commands::{CreateAccount, SignInAccount},
         Account,
     },
-    services::cross_cutting_traits::TransactionUnitOfWork,
+    services::{cross_cutting_traits::TransactionUnitOfWork, responses::ServiceError},
 };
 use serde_json::Value;
 
@@ -14,24 +14,26 @@ struct AccountHandler<R> {
 
 // Transactional Handler
 impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
-    async fn create_account(&self, cmd: CreateAccount) {
-        self.repo.begin().await;
+    async fn create_account(&mut self, cmd: CreateAccount) -> Result<(), ServiceError> {
+        self.repo.begin().await?;
 
         let account = Account::new(cmd);
-        self.repo.add(&account).await;
+        self.repo.add(&account).await?;
 
-        self.repo.commit().await;
+        self.repo.commit().await?;
+
+        Ok(())
     }
 }
 
 // Non-Transactional Handler
 impl<R: AccountRepository> AccountHandler<R> {
-    async fn sign_in_account(&self, cmd: SignInAccount) -> Value {
-        let aggregate = self.repo.get(cmd.id).await;
+    async fn sign_in_account(&self, cmd: SignInAccount) -> Result<Value, ServiceError> {
+        let aggregate = self.repo.get(cmd.id).await?;
 
         if !aggregate.verify_password(&cmd.password) {
             todo!()
         }
-        aggregate.create_access_token()
+        Ok(aggregate.create_access_token())
     }
 }
