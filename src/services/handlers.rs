@@ -1,7 +1,4 @@
-use crate::domains::{
-    commands::CreateAccount,
-    models::{repositories::AccountRepository, Account},
-};
+use crate::domains::auth::{commands::CreateAccount, repository::AccountRepository, Account};
 
 struct AccountHandler {
     repo: Box<dyn AccountRepository>,

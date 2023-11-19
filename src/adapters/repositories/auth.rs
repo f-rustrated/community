@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::domains::models::{repositories::AccountRepository, Account};
+use crate::domains::auth::{repository::AccountRepository, Account};
 
 use super::SqlRepository;
 
