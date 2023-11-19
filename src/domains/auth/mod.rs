@@ -1,10 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use serde_json::Value;
 use uuid::Uuid;
 
 use self::commands::CreateAccount;
 pub mod commands;
-pub(crate) mod repository;
 
 #[derive(Serialize)]
 pub enum AccountStatus {
@@ -26,6 +26,19 @@ pub struct Account {
 
 impl Account {
     pub(crate) fn new(cmd: CreateAccount) -> Self {
+        todo!()
+    }
+
+    // * For the given aggregate, verify passed password
+    pub(crate) fn verify_password(&self, plaintext_password: &str) -> bool {
+        todo!()
+    }
+
+    // * static method to create hashed_password
+    pub(crate) fn create_password(plaintext_password: &str) -> String {
+        todo!()
+    }
+    pub(crate) fn create_access_token(&self) -> Value {
         todo!()
     }
 }

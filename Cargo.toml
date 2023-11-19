@@ -22,3 +22,6 @@ async-trait= "*"
 name = "web"
 path = "./src/bin/web/main.rs"
 
+
+[lints.rust]
+unsafe_code="forbid"
