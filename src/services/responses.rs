@@ -7,6 +7,7 @@ pub enum BaseError {
     NotFound,
     ContraintError,
     TransactionError,
+    InternalError,
 }
 
 #[derive(Debug)]

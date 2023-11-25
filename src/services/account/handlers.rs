@@ -8,32 +8,41 @@ use crate::{
 };
 use serde_json::Value;
 
-struct AccountHandler<R> {
-    repo: R,
+#[derive(Clone)]
+pub(crate) struct AccountHandler<R> {
+    pub(crate) repo: R,
 }
 
 // Transactional Handler
 impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
-    async fn create_account(&mut self, cmd: CreateAccount) -> Result<(), ServiceError> {
+    pub(crate) async fn create_account(&mut self, cmd: CreateAccount) -> Result<Account, ServiceError> {
         self.repo.begin().await?;
 
-        let account = Account::new(cmd);
-        self.repo.add(&account).await?;
+        let account = match self.repo.add(&Account::new(&cmd)).await {
+            Ok(account) => Ok(account),
+            Err(e) => {
+                Err(ServiceError::from(e))
+            }
+        };
 
         self.repo.commit().await?;
 
-        Ok(())
+        account
     }
 }
 
 // Non-Transactional Handler
 impl<R: AccountRepository> AccountHandler<R> {
-    async fn sign_in_account(&self, cmd: SignInAccount) -> Result<Value, ServiceError> {
-        let aggregate = self.repo.get(cmd.id).await?;
-
-        if !aggregate.verify_password(&cmd.password) {
-            todo!()
+    pub(crate) async fn get_account(&self, id: i64) -> Result<Account, ServiceError> {
+        match self.repo.get(id).await {
+            Ok(account) => Ok(account),
+            Err(e) => {
+                Err(ServiceError::from(e))
+            }
         }
-        Ok(aggregate.create_access_token())
+    }
+
+    async fn sign_in_account(&self, cmd: SignInAccount) -> Result<Value, ServiceError> {
+        todo!()
     }
 }
