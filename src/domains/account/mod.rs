@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::{Decode, FromRow};
+use sqlx::FromRow;
 use uuid::Uuid;
 
 use self::commands::CreateAccount;

@@ -22,7 +22,7 @@ impl TransactionUnitOfWork for SqlRepository {
                     self.pool
                         .begin()
                         .await
-                        .map_err(|_| BaseError::DatabaseConnectionFailed)?,
+                        .map_err(|_| BaseError::TransactionError)?,
                 )
             }
             Some(_) => Err(BaseError::TransactionError)?,
@@ -51,7 +51,7 @@ impl TransactionUnitOfWork for SqlRepository {
             Some(trx) => trx.rollback().await.map_err(|err| {
                 eprintln!("Transaction begun but failed to roll back: {}", err);
                 BaseError::TransactionError
-            })
+            }),
         }
     }
 }
@@ -76,6 +76,13 @@ pub fn pool() -> &'static PgPool {
         .join()
         .expect("Failed to run connection pool fetching operation!")
     })
+}
+
+impl From<sqlx::Error> for BaseError {
+    fn from(value: sqlx::Error) -> Self {
+        tracing::error!("Database Error! {}", value);
+        Self::DatabaseError
+    }
 }
 
 #[cfg(test)]
