@@ -29,7 +29,7 @@ impl AccountRepository for SqlRepository {
             WHERE name = $1
         "#,
         email)
-            .fetch_one(pool().await)
+            .fetch_one(self.pool)
             .await?
         )
     }

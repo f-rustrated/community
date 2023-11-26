@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgConnection, PgPool};
 use std::sync::OnceLock;
+use tokio::sync::OnceCell;
 
 use crate::services::cross_cutting_traits::TransactionUnitOfWork;
 use crate::services::responses::BaseError;
@@ -67,6 +68,7 @@ pub async fn pool() -> &'static PgPool {
     static SQLX_CONNECTION_POOL: OnceLock<PgPool> = OnceLock::new();
     if SQLX_CONNECTION_POOL.get().is_none() {
         let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set!");
+
         let _ = SQLX_CONNECTION_POOL.set(
             PgPoolOptions::new()
                 .max_connections(30)
