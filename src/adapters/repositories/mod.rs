@@ -8,9 +8,32 @@ use std::sync::OnceLock;
 use crate::services::cross_cutting_traits::TransactionUnitOfWork;
 use crate::services::responses::BaseError;
 
-struct SqlRepository {
-    pool: &'static PgPool,
-    transaction: Option<sqlx::Transaction<'static, sqlx::Postgres>>,
+pub enum Either<A, B> {
+    Left(A),
+    Right(B),
+}
+
+pub struct SqlRepository {
+    pub pool: &'static PgPool,
+    pub transaction: Option<sqlx::Transaction<'static, sqlx::Postgres>>,
+}
+
+impl SqlRepository {
+    pub fn new(pool: &'static PgPool) -> Self {
+        SqlRepository {
+            pool: pool,
+            transaction: None,
+        }
+    }
+
+    pub fn get_conn(
+        &mut self,
+    ) -> Either<&'static PgPool, sqlx::Transaction<'static, sqlx::Postgres>> {
+        match self.transaction.take() {
+            Some(trx) => Either::Right(trx),
+            None => Either::Left(self.pool),
+        }
+    }
 }
 
 #[async_trait]

@@ -7,14 +7,21 @@ use crate::{
     services::{cross_cutting_traits::TransactionUnitOfWork, responses::ServiceError},
 };
 use serde_json::Value;
+use uuid::Uuid;
 
-struct AccountHandler<R> {
+pub struct AccountHandler<R> {
     repo: R,
+}
+
+impl<R: AccountRepository> AccountHandler<R> {
+    pub fn new(repo: R) -> AccountHandler<R> {
+        AccountHandler { repo: repo }
+    }
 }
 
 // Transactional Handler
 impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
-    async fn create_account(&mut self, cmd: CreateAccount) -> Result<(), ServiceError> {
+    pub async fn create_account(&mut self, cmd: CreateAccount) -> Result<(), ServiceError> {
         self.repo.begin().await?;
 
         let account = Account::new(cmd);
@@ -28,6 +35,14 @@ impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
 
 // Non-Transactional Handler
 impl<R: AccountRepository> AccountHandler<R> {
+    pub async fn get_account(&mut self, uuid: Uuid) -> Result<Account, ServiceError> {
+        // let aggregate = self.repo.get_by_uuid(uuid).await?;
+        match self.repo.get_by_uuid(uuid).await {
+            Ok(account) => Ok(account),
+            Err(err) => Err(ServiceError::from(err)),
+        }
+    }
+
     async fn sign_in_account(&self, cmd: SignInAccount) -> Result<Value, ServiceError> {
         let aggregate = self.repo.get(cmd.id).await?;
 

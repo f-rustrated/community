@@ -1,27 +1,29 @@
-use chrono::{DateTime, Utc};
-use serde::Serialize;
+use chrono::{DateTime, Utc, NaiveDateTime};
+use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use uuid::Uuid;
+use sqlx;
 
 use self::commands::CreateAccount;
 pub mod commands;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::Type)]
+#[sqlx(type_name = "account_status")]
 pub enum AccountStatus {
     Active,
     Deleted,
     Abnormal,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Account {
-    id: i64,
-    uuid: Uuid,
-    name: String,
-    status: AccountStatus,
-    hashed_password: String,
-    created_at: DateTime<Utc>,
-    updated_at: DateTime<Utc>,
+    pub id: i64,
+    pub uuid: Uuid,
+    pub name: String,
+    pub status: AccountStatus,
+    pub hashed_password: String,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
 }
 
 impl Account {
