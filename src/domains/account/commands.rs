@@ -1,11 +1,13 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct CreateAccount {
-    pub account_name: String,
+    pub email: String,
+    pub password: String,
 }
 
+#[derive(Deserialize, Clone)]
 pub struct SignInAccount {
-    pub id: i64,
+    pub email: String,
     pub password: String,
 }

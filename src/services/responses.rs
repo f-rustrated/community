@@ -3,15 +3,17 @@
 // TODO define service error for fallible service operation
 #[derive(Debug)]
 pub enum BaseError {
-    DatabaseConnectionFailed,
+    DatabaseError,
     NotFound,
-    ContraintError,
+    ConstraintError,
     TransactionError,
+    InternalError,
 }
 
 #[derive(Debug)]
 pub enum ServiceError {
     BaseError(BaseError),
+    AuthenticationError(String)
 }
 
 impl From<BaseError> for ServiceError {
