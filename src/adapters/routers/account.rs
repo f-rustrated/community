@@ -29,7 +29,7 @@ pub fn account_router() -> Router {
     let create_account = move || async move {
         match account_handler()
             .create_account(CreateAccount {
-                account_name: "test".to_owned(),
+                name: "test".to_owned(),
                 password: "test".to_owned(),
             })
             .await

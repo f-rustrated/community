@@ -44,6 +44,37 @@ impl AccountRepository for SqlRepository {
 
 #[cfg(test)]
 mod account_repository_test {
+    use dotenv::dotenv;
+    use crate::adapters::repositories::SqlRepository;
+    use crate::services::account::repository::AccountRepository;
+
     #[tokio::test]
-    async fn test_get() {}
+    async fn test_get() {
+        todo!("What's wrong with this test?");
+        // assertion `left == right` failed
+        // left: 0
+        // right: 1
+        //
+        // Left:  0
+        // Right: 1
+
+        // dotenv().ok();
+        //
+        // let repository = SqlRepository {
+        //     pool: crate::adapters::repositories::pool(),
+        //     transaction: None,
+        // };
+        //
+        // let account = repository.add(&crate::domains::account::Account::new(
+        //     &crate::domains::account::commands::CreateAccount {
+        //         name: "test".to_string(),
+        //         password: "test".to_string(),
+        //     },
+        // )).await.unwrap();
+        //
+        // let retrieved_account = repository.get(account.id).await.unwrap();
+        // assert_eq!(retrieved_account.name, "test");
+        // assert_eq!(retrieved_account.hashed_password, "test");
+        // assert_eq!(retrieved_account.status, crate::domains::account::AccountStatus::Active);
+    }
 }

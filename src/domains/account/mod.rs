@@ -8,7 +8,7 @@ use self::commands::CreateAccount;
 
 pub mod commands;
 
-#[derive(sqlx::Type, Debug, Serialize, Deserialize)]
+#[derive(sqlx::Type, Debug, Serialize, Deserialize, PartialEq)]
 #[sqlx(type_name = "account_status", rename_all = "lowercase")]
 pub enum AccountStatus {
     Active,
@@ -32,7 +32,7 @@ impl Account {
         Self {
             id: 0,
             uuid: Uuid::new_v4(),
-            name: cmd.account_name.to_string(),
+            name: cmd.name.to_string(),
             status: AccountStatus::Active,
             hashed_password: Self::create_password(&cmd.password),
             created_at: chrono::Utc::now().naive_utc(),

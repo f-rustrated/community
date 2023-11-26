@@ -23,8 +23,6 @@ impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
 
         let account = self.repo.add(&Account::new(&cmd)).await?;
 
-        //TODO Add account to repo!
-
         self.repo.commit().await?;
 
         Ok(account)

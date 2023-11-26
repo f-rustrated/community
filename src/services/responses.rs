@@ -5,7 +5,7 @@
 pub enum BaseError {
     DatabaseError,
     NotFound,
-    ContraintError,
+    ConstraintError,
     TransactionError,
     InternalError,
 }
