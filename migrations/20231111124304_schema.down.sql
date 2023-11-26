@@ -11,3 +11,4 @@ drop table if exists public.post;
 
 drop table if exists public.account;
 drop type account_status;
+drop type post_category;

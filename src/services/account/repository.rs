@@ -8,7 +8,7 @@ pub trait AccountRepository {
 
     async fn get_by_email(&self, email: String) -> Result<Account, BaseError>;
 
-    async fn add(&self, account: &Account) -> Result<Account, BaseError>;
+    async fn add(&mut self, account: &Account) -> Result<Account, BaseError>;
 
-    async fn update(&self, account: &Account) -> Result<(), BaseError>;
+    async fn update(&mut self, account: &Account) -> Result<(), BaseError>;
 }
