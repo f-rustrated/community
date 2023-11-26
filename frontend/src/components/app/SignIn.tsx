@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CuddlyFerris from 'assets/cuddly_ferris.png';
+import axios from 'axios';
 
 function Copyright(props: any) {
   return (
@@ -28,13 +29,20 @@ function Copyright(props: any) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    try {
+      // TODO("fix CORS ERROR!!") 
+      const token = await axios.post('http://localhost:8080/accounts/sign-in', {
+        email: data.get('email'),
+        password: data.get('password'),
+      });
+
+      console.log(token); 
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -54,7 +62,7 @@ export default function SignIn() {
                   imgProps={{ style: { height: '30px' } }}
                   variant={'square'} />
           <Typography component='h1' variant='h5'>
-            Sign in
+            Sign In
           </Typography>
           <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField

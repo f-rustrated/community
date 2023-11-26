@@ -13,6 +13,7 @@ pub enum BaseError {
 #[derive(Debug)]
 pub enum ServiceError {
     BaseError(BaseError),
+    AuthenticationError(String)
 }
 
 impl From<BaseError> for ServiceError {

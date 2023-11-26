@@ -32,7 +32,7 @@ impl Account {
         Self {
             id: 0,
             uuid: Uuid::new_v4(),
-            name: cmd.name.to_string(),
+            name: cmd.email.to_string(),
             status: AccountStatus::Active,
             hashed_password: Self::create_password(&cmd.password),
             created_at: chrono::Utc::now().naive_utc(),
@@ -42,7 +42,7 @@ impl Account {
 
     // * For the given aggregate, verify passed password
     pub(crate) fn verify_password(&self, plaintext_password: &str) -> bool {
-        todo!()
+        return plaintext_password == "hashed_password";
     }
 
     // * static method to create hashed_password

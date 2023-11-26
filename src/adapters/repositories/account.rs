@@ -21,6 +21,19 @@ impl AccountRepository for SqlRepository {
         )
     }
 
+    async fn get_by_email(&self, email: String) -> Result<Account, BaseError> {
+        Ok(sqlx::query_as!(Account,
+        r#"
+            SELECT id, uuid, name, status AS "status!: AccountStatus", hashed_password, created_at, updated_at
+            FROM account
+            WHERE name = $1
+        "#,
+        email)
+            .fetch_one(pool())
+            .await?
+        )
+    }
+
     async fn add(&self, account: &Account) -> Result<Account, BaseError> {
         Ok(sqlx::query_as!(Account,
         r#"
