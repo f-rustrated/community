@@ -1,10 +1,11 @@
+use std::sync::OnceLock;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use sqlx::FromRow;
 use uuid::Uuid;
 use crate::domains::account::commands::UpdateAccount;
 use bcrypt::{DEFAULT_COST};
+use jwt_simple::prelude::{Claims, Duration, HS256Key, MACLike};
 
 use self::commands::SignUpAccount;
 
@@ -65,7 +66,18 @@ impl Account {
         let hashed_password = bcrypt::hash_with_result(plaintext_password, DEFAULT_COST).unwrap();
         return hashed_password.to_string();
     }
-    pub(crate) fn create_access_token(&self) -> Value {
-        todo!()
+    pub(crate) fn create_access_token(&self) -> String {
+        let claims = Claims::create(Duration::from_hours(2));
+        let token = jwt_token_secret_key().authenticate(claims).unwrap();
+        return token;
     }
+}
+
+pub fn jwt_token_secret_key() -> &'static HS256Key {
+    static JWT_TOKEN_SECRET_KEY: OnceLock<HS256Key> = OnceLock::new();
+    JWT_TOKEN_SECRET_KEY.get_or_init(|| {
+        let jwt_token_secret = std::env::var("JWT_TOKEN_SECRET").unwrap();
+        let decoded_token_secret = base64::decode(jwt_token_secret).unwrap();
+        HS256Key::from_bytes(decoded_token_secret.as_slice())
+    })
 }

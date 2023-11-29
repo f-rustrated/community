@@ -30,7 +30,7 @@ pub fn account_router() -> Router {
             .sign_in_account(payload)
             .await {
             Ok(response) => {
-                "ok".to_owned()
+                response
             }
             Err(_) => "error".to_owned(),
         }

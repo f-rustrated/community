@@ -59,7 +59,7 @@ impl<R: AccountRepository> AccountHandler<R> {
         match self.repo.get_by_email(cmd.email).await {
             Ok(account) => {
                 if account.verify_password(&cmd.password) {
-                    return Ok("token".to_owned());
+                    return Ok(account.create_access_token());
                 }
             }
             _ => {}
