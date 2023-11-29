@@ -1,0 +1,32 @@
+### Check
+GET http://localhost:8080
+
+### GET Account
+GET http://localhost:8080/accounts/1
+
+### Sign Up Account
+POST http://localhost:8080/accounts/sign-up
+Content-Type: application/json
+
+{
+  "email": "seonwoo@gmail.com",
+  "password": "1234"
+}
+
+### Sign In Account
+POST http://localhost:8080/accounts/sign-in
+Content-Type: application/json
+
+{
+  "email": "seonwoo@gmail.com",
+  "password": "12345"
+}
+
+### Update account
+PUT http://localhost:8080/accounts
+Content-Type: application/json
+
+{
+  "uuid": "a80fc55d-0bd2-4529-9414-8f8f0b1bdd20",
+  "password": "12345"
+}

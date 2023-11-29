@@ -6,6 +6,8 @@ use crate::{domains::account::Account, services::responses::BaseError};
 pub trait AccountRepository {
     async fn get(&self, id: i64) -> Result<Account, BaseError>;
 
+    async fn get_by_uuid(&self, uuid: uuid::Uuid) -> Result<Account, BaseError>;
+
     async fn get_by_email(&self, email: String) -> Result<Account, BaseError>;
 
     async fn add(&self, account: &Account) -> Result<Account, BaseError>;

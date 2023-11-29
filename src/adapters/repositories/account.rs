@@ -21,6 +21,19 @@ impl AccountRepository for SqlRepository {
         )
     }
 
+    async fn get_by_uuid(&self, uuid: uuid::Uuid) -> Result<Account, BaseError> {
+        Ok(sqlx::query_as!(Account,
+        r#"
+            SELECT id, uuid, name, status AS "status!: AccountStatus", hashed_password, created_at, updated_at
+            FROM account
+            WHERE uuid = $1
+        "#,
+        uuid)
+            .fetch_one(pool())
+            .await?
+        )
+    }
+
     async fn get_by_email(&self, email: String) -> Result<Account, BaseError> {
         Ok(sqlx::query_as!(Account,
         r#"
@@ -51,7 +64,24 @@ impl AccountRepository for SqlRepository {
     }
 
     async fn update(&self, account: &Account) -> Result<(), BaseError> {
-        todo!()
+        let res = sqlx::query!(
+        r#"
+            UPDATE account
+            SET name = $1, status = $2, hashed_password = $3, updated_at = $4
+            WHERE id = $5
+        "#,
+        &account.name,
+        account.status as AccountStatus,
+        &account.hashed_password,
+        account.updated_at,
+        account.id)
+            .execute(pool())
+            .await?;
+
+        match res.rows_affected() {
+            1 => Ok(()),
+            _ => Err(BaseError::InternalError),
+        }
     }
 }
 
