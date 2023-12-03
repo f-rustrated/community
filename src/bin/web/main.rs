@@ -1,11 +1,14 @@
-use std::net::SocketAddr;
+mod routers;
 use dotenv::dotenv;
-use community::adapters::routers::router;
+use std::net::SocketAddr;
+
+use crate::routers::router;
+pub mod composition_root;
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    dotenv().ok(); 
+    dotenv().ok();
 
     let app = router();
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

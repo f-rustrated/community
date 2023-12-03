@@ -4,7 +4,7 @@ use crate::{
 };
 use async_trait::async_trait;
 
-use super::{pool, SqlRepository};
+use super::SqlRepository;
 
 #[async_trait]
 impl AccountRepository for SqlRepository {

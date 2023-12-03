@@ -4,7 +4,6 @@ use async_trait::async_trait;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgConnection, PgPool};
 use std::sync::OnceLock;
-use tokio::sync::OnceCell;
 
 use crate::services::cross_cutting_traits::TransactionUnitOfWork;
 use crate::services::responses::BaseError;
@@ -12,6 +11,14 @@ use crate::services::responses::BaseError;
 pub struct SqlRepository {
     pub(crate) pool: &'static PgPool,
     pub(crate) transaction: Option<sqlx::Transaction<'static, sqlx::Postgres>>,
+}
+impl SqlRepository {
+    pub async fn new() -> Self {
+        Self {
+            pool: pool().await,
+            transaction: Default::default(),
+        }
+    }
 }
 
 impl SqlRepository {
