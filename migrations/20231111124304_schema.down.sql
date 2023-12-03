@@ -5,6 +5,8 @@ drop table if exists public.comment_reaction;
 drop table if exists public.comment_statistic;
 drop table if exists public.comment;
 
+drop table if exists public.post_category;
+drop table if exists public.post_status;
 drop table if exists public.post_reaction;
 drop table if exists public.post_statistic;
 drop table if exists public.post;
