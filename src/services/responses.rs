@@ -30,6 +30,7 @@ impl From<BaseError> for ServiceError {
 pub enum ApplicationResponse {
     Account(AccountResponse),
     String(String),
+    I64(i64),
 }
 
 impl From<String> for ApplicationResponse {

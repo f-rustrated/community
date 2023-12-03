@@ -34,20 +34,22 @@ impl AccountRepository for SqlRepository {
         )
     }
 
-    async fn add(&mut self, account: &Account) -> Result<Account, BaseError> {
-        Ok(sqlx::query_as!(Account,
-        r#"
+    async fn add(&mut self, account: &Account) -> Result<i64, BaseError> {
+        let rec = sqlx::query!(
+            r#"
             INSERT INTO account (uuid, name, status, hashed_password)
             VALUES ($1, $2, $3, $4)
-            RETURNING id, uuid, name, status AS "status!: AccountStatus", hashed_password, created_at, updated_at
+            RETURNING id
         "#,
-        account.uuid,
-        &account.name,
-        AccountStatus::Active as AccountStatus,
-        &account.hashed_password)
-            .fetch_one(  self.transaction()?)
-            .await?
+            account.uuid,
+            &account.name,
+            AccountStatus::Active as AccountStatus,
+            &account.hashed_password
         )
+        .fetch_one(self.transaction()?)
+        .await?;
+
+        Ok(rec.id)
     }
 
     async fn update(&mut self, account: &Account) -> Result<(), BaseError> {
@@ -134,7 +136,7 @@ mod account_repository_test {
 
             repository.begin().await.expect("begin fail!");
 
-            let account = repository
+            let account_id = repository
                 .add(&account_create_helper(
                     test_password.clone(),
                     test_email.clone(),
@@ -146,7 +148,7 @@ mod account_repository_test {
 
             '_when: {
                 let retrieved_account = repository
-                    .get(account.id)
+                    .get(account_id)
                     .await
                     .expect("something happened at get!");
 

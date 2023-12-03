@@ -30,11 +30,11 @@ impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
     ) -> Result<ApplicationResponse, ServiceError> {
         self.repo.begin().await?;
 
-        let account = self.repo.add(&Account::new(&cmd)).await?;
+        let account_id = self.repo.add(&Account::new(&cmd)).await?;
 
         self.repo.commit().await?;
 
-        Ok(Into::<AccountResponse>::into(account).into())
+        Ok(ApplicationResponse::I64(account_id))
     }
 }
 
