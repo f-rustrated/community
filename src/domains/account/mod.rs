@@ -4,6 +4,8 @@ use serde_json::Value;
 pub mod response;
 use uuid::Uuid;
 
+use crate::services::responses::ServiceError;
+
 use self::commands::CreateAccount;
 
 pub mod commands;
@@ -43,8 +45,8 @@ impl Account {
     }
 
     // * For the given aggregate, verify passed password
-    pub(crate) fn verify_password(&self, plaintext_password: &str) -> bool {
-        plaintext_password == "hashed_password"
+    pub(crate) fn verify_password(&self, plaintext_password: &str) -> Result<(), ServiceError> {
+        todo!();
     }
 
     // * static method to create hashed_password
