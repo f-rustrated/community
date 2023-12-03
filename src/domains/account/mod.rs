@@ -1,12 +1,14 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlx::FromRow;
+
 use uuid::Uuid;
 
 use self::commands::CreateAccount;
 
 pub mod commands;
+#[cfg(test)]
+pub mod test;
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, PartialEq)]
 #[sqlx(type_name = "account_status", rename_all = "lowercase")]
@@ -16,15 +18,15 @@ pub enum AccountStatus {
     Abnormal,
 }
 
-#[derive(Debug, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Account {
     pub(crate) id: i64,
     pub(crate) uuid: Uuid,
     pub(crate) name: String,
     pub(crate) status: AccountStatus,
     pub(crate) hashed_password: String,
-    pub(crate) created_at: NaiveDateTime,
-    pub(crate) updated_at: NaiveDateTime,
+    pub(crate) created_at: DateTime<Utc>,
+    pub(crate) updated_at: DateTime<Utc>,
 }
 
 impl Account {
@@ -35,19 +37,19 @@ impl Account {
             name: cmd.email.to_string(),
             status: AccountStatus::Active,
             hashed_password: Self::create_password(&cmd.password),
-            created_at: chrono::Utc::now().naive_utc(),
-            updated_at: chrono::Utc::now().naive_utc(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
 
     // * For the given aggregate, verify passed password
     pub(crate) fn verify_password(&self, plaintext_password: &str) -> bool {
-        return plaintext_password == "hashed_password";
+        plaintext_password == "hashed_password"
     }
 
     // * static method to create hashed_password
     pub(crate) fn create_password(plaintext_password: &str) -> String {
-        return String::from("hashed_password");
+        String::from("hashed_password")
     }
     pub(crate) fn create_access_token(&self) -> Value {
         todo!()

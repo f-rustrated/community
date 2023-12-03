@@ -6,8 +6,6 @@ use crate::{
     },
     services::{cross_cutting_traits::TransactionUnitOfWork, responses::ServiceError},
 };
-use serde_json::Value;
-use crate::services::responses::BaseError;
 
 #[derive(Clone)]
 pub(crate) struct AccountHandler<R> {
@@ -37,15 +35,10 @@ impl<R: AccountRepository> AccountHandler<R> {
     }
 
     pub(crate) async fn sign_in_account(&self, cmd: SignInAccount) -> Result<String, ServiceError> {
-        match self.repo.get_by_email(cmd.email).await {
-            Ok(account) =>  {
-              if account.verify_password(&cmd.password) {
-                  return Ok("token".to_owned())
-              }
-            }
-            _ => {}
-        }
-
-        Err(ServiceError::AuthenticationError("Invalid email or password".to_owned()))
+        self.repo.get_by_email(cmd.email).await.map_err(|err| {
+            tracing::error!("{:?}", err);
+            ServiceError::AuthenticationError("Invalid email or password".to_owned())
+        })?;
+        Ok("token".to_owned())
     }
 }

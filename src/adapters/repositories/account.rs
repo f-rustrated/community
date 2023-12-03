@@ -16,7 +16,7 @@ impl AccountRepository for SqlRepository {
             WHERE id = $1
         "#,
         id)
-            .fetch_one(pool())
+            .fetch_one(self.pool)
             .await?
         )
     }
@@ -29,12 +29,12 @@ impl AccountRepository for SqlRepository {
             WHERE name = $1
         "#,
         email)
-            .fetch_one(pool())
+            .fetch_one(self.pool)
             .await?
         )
     }
 
-    async fn add(&self, account: &Account) -> Result<Account, BaseError> {
+    async fn add(&mut self, account: &Account) -> Result<Account, BaseError> {
         Ok(sqlx::query_as!(Account,
         r#"
             INSERT INTO account (uuid, name, status, hashed_password)
@@ -45,49 +45,120 @@ impl AccountRepository for SqlRepository {
         &account.name,
         AccountStatus::Active as AccountStatus,
         &account.hashed_password)
-            .fetch_one(pool())
+            .fetch_one(  self.transaction()?)
             .await?
         )
     }
 
-    async fn update(&self, account: &Account) -> Result<(), BaseError> {
+    async fn update(&mut self, account: &Account) -> Result<(), BaseError> {
         todo!()
     }
 }
 
 #[cfg(test)]
 mod account_repository_test {
-    use dotenv::dotenv;
-    use crate::adapters::repositories::SqlRepository;
+    use crate::adapters::repositories::{pool, SqlRepository};
+    use crate::domains::account::test::account_create_helper;
+    use crate::domains::account::AccountStatus;
     use crate::services::account::repository::AccountRepository;
+    use crate::services::cross_cutting_traits::TransactionUnitOfWork;
+
+    async fn set_up() {
+        sqlx::query!(
+            r#"
+            TRUNCATE 
+                post,
+                account
+            CASCADE;
+        "#
+        )
+        .execute(pool().await)
+        .await
+        .unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_add() {
+        '_given: {
+            dotenv::dotenv().ok();
+            set_up().await;
+            let test_password = "test".to_string();
+            let test_email = "test@mail.com".to_string();
+            let mut repository = SqlRepository {
+                pool: crate::adapters::repositories::pool().await,
+                transaction: None,
+            };
+            let account = account_create_helper(test_password.clone(), test_email.clone());
+
+            '_when: {
+                repository.begin().await.expect("begin fail!");
+                repository.add(&account).await.expect("Shouldn't fail!");
+                repository.commit().await.expect("begin fail!");
+
+                let record = sqlx::query!(
+                    r#"
+                    SELECT id, name, status AS "status!: AccountStatus", hashed_password
+                    FROM account
+                "#,
+                )
+                .fetch_one(repository.pool)
+                .await
+                .unwrap();
+
+                '_then: {
+                    assert_eq!(record.name, "test@mail.com");
+                    assert_eq!(record.hashed_password, "hashed_password");
+                    assert_eq!(
+                        record.status,
+                        crate::domains::account::AccountStatus::Active
+                    );
+                    // * id is auto-generated value
+                    assert_ne!(record.id, account.id)
+                }
+            }
+        }
+    }
 
     #[tokio::test]
     async fn test_get() {
-        todo!("What's wrong with this test?");
-        // assertion `left == right` failed
-        // left: 0
-        // right: 1
-        //
-        // Left:  0
-        // Right: 1
+        '_given: {
+            dotenv::dotenv().ok();
+            set_up().await;
 
-        // dotenv().ok();
-        //
-        // let repository = SqlRepository {
-        //     pool: crate::adapters::repositories::pool(),
-        //     transaction: None,
-        // };
-        //
-        // let account = repository.add(&crate::domains::account::Account::new(
-        //     &crate::domains::account::commands::CreateAccount {
-        //         name: "test".to_string(),
-        //         password: "test".to_string(),
-        //     },
-        // )).await.unwrap();
-        //
-        // let retrieved_account = repository.get(account.id).await.unwrap();
-        // assert_eq!(retrieved_account.name, "test");
-        // assert_eq!(retrieved_account.hashed_password, "test");
-        // assert_eq!(retrieved_account.status, crate::domains::account::AccountStatus::Active);
+            let mut repository = SqlRepository {
+                pool: crate::adapters::repositories::pool().await,
+                transaction: None,
+            };
+            let test_password = "test".to_string();
+            let test_email = "test@mail.com".to_string();
+
+            repository.begin().await.expect("begin fail!");
+
+            let account = repository
+                .add(&account_create_helper(
+                    test_password.clone(),
+                    test_email.clone(),
+                ))
+                .await
+                .expect("something happened at add!");
+
+            repository.commit().await.unwrap();
+
+            '_when: {
+                let retrieved_account = repository
+                    .get(account.id)
+                    .await
+                    .expect("something happened at get!");
+
+                '_then: {
+                    assert_eq!(retrieved_account.name, "test@mail.com");
+                    assert_eq!(retrieved_account.hashed_password, "hashed_password");
+                    assert_eq!(
+                        retrieved_account.status,
+                        crate::domains::account::AccountStatus::Active
+                    );
+                }
+            }
+        }
     }
 }

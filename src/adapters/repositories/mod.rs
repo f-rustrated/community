@@ -2,8 +2,9 @@ pub mod account;
 pub mod post;
 use async_trait::async_trait;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
+use sqlx::{PgConnection, PgPool};
 use std::sync::OnceLock;
+use tokio::sync::OnceCell;
 
 use crate::services::cross_cutting_traits::TransactionUnitOfWork;
 use crate::services::responses::BaseError;
@@ -13,17 +14,24 @@ pub struct SqlRepository {
     pub(crate) transaction: Option<sqlx::Transaction<'static, sqlx::Postgres>>,
 }
 
+impl SqlRepository {
+    pub fn transaction(&mut self) -> Result<&mut PgConnection, BaseError> {
+        match self.transaction.as_mut() {
+            Some(trx) => Ok(&mut *trx),
+            None => {
+                tracing::error!("Transaction has not begun!");
+                Err(BaseError::TransactionError)
+            }
+        }
+    }
+}
+
 #[async_trait]
 impl TransactionUnitOfWork for SqlRepository {
     async fn begin(&mut self) -> Result<(), BaseError> {
         match self.transaction {
             None => {
-                self.transaction = Some(
-                    self.pool
-                        .begin()
-                        .await
-                        .map_err(|_| BaseError::TransactionError)?,
-                )
+                self.transaction = Some(self.pool.begin().await?);
             }
             Some(_) => Err(BaseError::TransactionError)?,
         }
@@ -56,26 +64,20 @@ impl TransactionUnitOfWork for SqlRepository {
     }
 }
 
-pub fn pool() -> &'static PgPool {
+pub async fn pool() -> &'static PgPool {
     static SQLX_CONNECTION_POOL: OnceLock<PgPool> = OnceLock::new();
+    if SQLX_CONNECTION_POOL.get().is_none() {
+        let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set!");
 
-    SQLX_CONNECTION_POOL.get_or_init(|| {
-        std::thread::spawn(|| {
-            #[tokio::main]
-            async fn _get_pool() -> PgPool {
-                let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set!");
-                PgPoolOptions::new()
-                    .max_connections(30)
-                    .connect(&url)
-                    .await
-                    .unwrap()
-            }
-
-            _get_pool()
-        })
-        .join()
-        .expect("Failed to run connection pool fetching operation!")
-    })
+        let _ = SQLX_CONNECTION_POOL.set(
+            PgPoolOptions::new()
+                .max_connections(30)
+                .connect(&url)
+                .await
+                .unwrap(),
+        );
+    }
+    SQLX_CONNECTION_POOL.get().unwrap()
 }
 
 impl From<sqlx::Error> for BaseError {

@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS public.account
     name            text                                     not null,
     status          account_status DEFAULT 'active'          not null,
     hashed_password text                                     not null,
-    created_at      timestamp      default CURRENT_TIMESTAMP not null,
-    updated_at      timestamp      default CURRENT_TIMESTAMP not null
+    created_at      timestamptz      default CURRENT_TIMESTAMP not null,
+    updated_at      timestamptz      default CURRENT_TIMESTAMP not null
 );
 
 comment on column public.account.uuid is 'public id to uniquely identify a account';
