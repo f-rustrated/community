@@ -1,6 +1,7 @@
 // TODO define service response for service objects
 
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::domains::account::response::AccountResponse;
 
@@ -31,11 +32,18 @@ pub enum ApplicationResponse {
     Account(AccountResponse),
     String(String),
     I64(i64),
+    Json(Value),
 }
 
 impl From<String> for ApplicationResponse {
     fn from(value: String) -> Self {
         Self::String(value)
+    }
+}
+
+impl From<Value> for ApplicationResponse {
+    fn from(value: Value) -> Self {
+        Self::Json(value)
     }
 }
 

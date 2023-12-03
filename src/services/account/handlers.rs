@@ -48,10 +48,11 @@ impl<R: AccountRepository> AccountHandler<R> {
         &self,
         cmd: SignInAccount,
     ) -> Result<ApplicationResponse, ServiceError> {
-        self.repo.get_by_email(cmd.email).await.map_err(|err| {
-            tracing::error!("{:?}", err);
-            ServiceError::AuthenticationError("Invalid email or password".to_owned())
-        })?;
-        Ok("token".to_owned().into())
+        let account = self.repo.get_by_email(cmd.email).await?;
+
+        account.verify_password(&cmd.password)?;
+
+        let token = account.create_access_token();
+        Ok(token.into())
     }
 }
