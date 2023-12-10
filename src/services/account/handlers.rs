@@ -2,7 +2,6 @@ use super::repository::AccountRepository;
 use crate::{
     domains::account::{
         commands::{CreateAccount, SignInAccount},
-        response::AccountResponse,
         Account,
     },
     services::{
