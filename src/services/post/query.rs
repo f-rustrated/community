@@ -1,4 +1,7 @@
-pub struct ListPosts {
-    from: i64,
-    to: i64,
+use serde::Deserialize;
+
+#[derive(Deserialize, Clone)]
+pub struct ListCommunityPosts {
+    pub(crate) from: i64,
+    pub(crate) size: i64,
 }
