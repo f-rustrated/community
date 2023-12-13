@@ -27,7 +27,7 @@ impl<R: PostCommandRepository + TransactionUnitOfWork> PostHandler<R> {
         cmd: CreatePost,
     ) -> Result<ApplicationResponse, ServiceError> {
         if (cmd.account_id.is_none()) {
-            return Err(ServiceError::AuthenticationError("account_id is required".to_string()));
+            return Err(ServiceError::UnAuthorized("account_id is required".to_string()));
         }
 
         self.repo.begin().await?;
