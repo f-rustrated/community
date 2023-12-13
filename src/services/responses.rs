@@ -18,6 +18,7 @@ pub enum BaseError {
 #[derive(Debug, Serialize)]
 pub enum ServiceError {
     BaseError(BaseError),
+    UnAuthorized(String),
     AuthenticationError(String),
 }
 

@@ -1,4 +1,4 @@
-use crate::domains::post::commands::{DeletePost, UpvotePost};
+use crate::domains::post::commands::{DeletePost, UpdatePost, UpvotePost};
 use crate::domains::post::{commands::CreatePost, CommunityPost};
 
 use super::repository::{PostCommandRepository, PostQueryRepository};
@@ -31,6 +31,20 @@ impl<R: PostCommandRepository + TransactionUnitOfWork> PostHandler<R> {
         let res = self.repo.add(&aggregate).await?;
         self.repo.commit().await?;
         Ok(ApplicationResponse::I64(res))
+    }
+
+    pub async fn update_post(
+        &mut self,
+        cmd: UpdatePost,
+    ) -> Result<(), ServiceError> {
+        self.repo.begin().await?;
+        let mut aggregate = self.repo.get(cmd.id).await?;
+        if aggregate.account_id != cmd.account_id {
+            return Err(ServiceError::UnAuthorized("account_id doesn't match".to_string()));
+        }
+        aggregate.update(cmd);
+        self.repo.update(&aggregate).await?;
+        Ok(())
     }
 
     pub async fn delete_post(&mut self, cmd: DeletePost) -> Result<(), ServiceError> {

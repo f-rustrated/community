@@ -2,6 +2,7 @@ pub mod commands;
 
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use crate::domains::post::commands::UpdatePost;
 
 use crate::services::responses::ServiceError;
 
@@ -10,7 +11,7 @@ use self::commands::{CreatePost, UpvotePost};
 #[derive(Serialize)]
 pub struct CommunityPost {
     pub id: i64,
-    account_id: i64,
+    pub(crate) account_id: i64,
     title: String,
     thumbnail: Option<String>,
     category: PostCategory,
@@ -23,7 +24,26 @@ pub struct CommunityPost {
 
 impl CommunityPost {
     pub fn new(cmd: CreatePost) -> Self {
-        unimplemented!()
+        Self {
+            id: 0,
+            account_id: cmd.account_id,
+            title: cmd.title,
+            thumbnail: cmd.thumbnail,
+            category: PostCategory::Default,
+            body: cmd.body,
+            status: PostStatus::Created,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        }
+    }
+
+    pub fn update(&mut self, cmd: UpdatePost) {
+        self.title = cmd.title;
+        self.thumbnail = cmd.thumbnail;
+        self.category = PostCategory::Default;
+        self.body = cmd.body;
+        self.updated_at = Utc::now();
+        self.updated_at = Utc::now();
     }
 
     pub fn delete(&mut self) {
