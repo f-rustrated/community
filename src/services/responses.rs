@@ -21,12 +21,24 @@ pub enum ServiceError {
     BaseError(BaseError),
     UnAuthorized(String),
     AuthenticationError(String),
+    InvalidPassword(PasswordPolicy),
+    HashLibError(String),
+    JWTError(String),
 }
 
 impl From<BaseError> for ServiceError {
     fn from(value: BaseError) -> Self {
         ServiceError::BaseError(value)
     }
+}
+
+#[derive(Debug, Serialize, PartialEq, Eq)]
+pub enum PasswordPolicy {
+    NotEnoughChars = 1,
+    AtLeastOneLower = 2,
+    AtLeastOneUpper = 3,
+    AtLeastOneNumber = 4,
+    AtLeastOneSpecialChar = 5,
 }
 
 #[derive(Serialize)]
