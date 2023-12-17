@@ -18,6 +18,7 @@ impl IntoResponse for AxumError {
     fn into_response(self) -> axum::response::Response {
         let (status, msg) = match self.0 {
             ServiceError::BaseError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "base_error"),
+            ServiceError::UnAuthorized(_) => (StatusCode::UNAUTHORIZED, "unauthorized"),
             ServiceError::AuthenticationError(_) => {
                 (StatusCode::UNAUTHORIZED, "authentication_error")
             }

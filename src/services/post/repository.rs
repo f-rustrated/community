@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::{domains::post::CommunityPost, services::responses::BaseError};
 
-use super::query::ListPosts;
+use super::query::ListCommunityPosts;
 
 #[async_trait]
 pub trait PostCommandRepository {
@@ -16,5 +16,5 @@ pub trait PostCommandRepository {
 #[async_trait]
 pub trait PostQueryRepository {
     async fn get(&self, id: i64) -> Result<CommunityPost, BaseError>;
-    async fn list_posts(&self, query: &ListPosts) -> Result<Vec<CommunityPost>, BaseError>;
+    async fn list_posts(&self, query: &ListCommunityPosts) -> Result<Vec<CommunityPost>, BaseError>;
 }

@@ -1,0 +1,32 @@
+### Creat post
+POST http://localhost:8080/api/v1/posts
+Content-Type: application/json
+
+{
+  "account_id": 1,
+  "title": "Hello",
+  "thumbnail": "https://example.com",
+  "category": "tech",
+  "body": "Hello World"
+}
+
+### Update post
+PUT http://localhost:8080/api/v1/posts
+Content-Type: application/json
+
+{
+  "id": 1,
+  "title": "Hello updated",
+  "thumbnail": "https://example.com updated",
+  "category": "tech updated",
+  "body": "Hello World updated"
+}
+
+### Delete post
+DELETE http://localhost:8080/api/v1/posts/2
+
+### Get post
+GET http://localhost:8080/api/v1/posts/2
+
+### List posts
+GET http://localhost:8080/api/v1/posts?from=99999999&size=10
