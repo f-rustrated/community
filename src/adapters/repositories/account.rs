@@ -90,7 +90,7 @@ mod account_repository_test {
                 pool: crate::adapters::repositories::pool().await,
                 transaction: None,
             };
-            let account = account_create_helper(test_password.clone(), test_email.clone());
+            let account = account_create_helper(test_password.clone(), test_email.clone()).unwrap();
 
             '_when: {
                 repository.begin().await.expect("begin fail!");
@@ -136,11 +136,11 @@ mod account_repository_test {
 
             repository.begin().await.expect("begin fail!");
 
+            let account =
+                &account_create_helper(test_password.clone(), test_email.clone()).unwrap();
+
             let account_id = repository
-                .add(&account_create_helper(
-                    test_password.clone(),
-                    test_email.clone(),
-                ))
+                .add(account)
                 .await
                 .expect("something happened at add!");
 

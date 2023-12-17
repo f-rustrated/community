@@ -6,13 +6,45 @@ use crate::{
     },
     services::{
         cross_cutting_traits::TransactionUnitOfWork,
-        responses::{ApplicationResponse, ServiceError},
+        responses::{ApplicationResponse, PasswordPolicy, ServiceError},
     },
 };
+use regex::Regex;
 
 #[derive(Clone)]
 pub struct AccountHandler<R> {
     repo: R,
+}
+
+const MIN_PASSWORD_LEN: usize = 8;
+
+pub(crate) fn validate_password(password: &str) -> Result<(), PasswordPolicy> {
+    if password.len() < MIN_PASSWORD_LEN {
+        return Err(PasswordPolicy::NotEnoughChars);
+    }
+
+    // TODO: compile regex once and reuse
+    let pattern = Regex::new(r#"[a-z]"#).unwrap();
+    if !pattern.is_match(password) {
+        return Err(PasswordPolicy::AtLeastOneLower);
+    }
+
+    let pattern = Regex::new(r#"[A-Z]"#).unwrap();
+    if !pattern.is_match(password) {
+        return Err(PasswordPolicy::AtLeastOneUpper);
+    }
+
+    let pattern = Regex::new(r#"\d"#).unwrap();
+    if !pattern.is_match(password) {
+        return Err(PasswordPolicy::AtLeastOneNumber);
+    }
+
+    let pattern = Regex::new(r#"[!@%^&*?_-]"#).unwrap();
+    if !pattern.is_match(password) {
+        return Err(PasswordPolicy::AtLeastOneSpecialChar);
+    }
+
+    Ok(())
 }
 
 impl<R> AccountHandler<R> {
@@ -29,7 +61,15 @@ impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
     ) -> Result<ApplicationResponse, ServiceError> {
         self.repo.begin().await?;
 
-        let account_id = self.repo.add(&Account::new(&cmd)).await?;
+        match validate_password(&cmd.password) {
+            Ok(_) => {}
+            Err(password_policy) => {
+                return Err(ServiceError::InvalidPassword(password_policy));
+            }
+        }
+
+        let account = &Account::new(&cmd)?;
+        let account_id = self.repo.add(account).await?;
 
         self.repo.commit().await?;
 
