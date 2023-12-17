@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 pub mod response;
 use bcrypt;
+use jsonwebtoken::{encode, EncodingKey, Header};
+use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use crate::services::responses::ServiceError;
@@ -17,6 +19,8 @@ pub mod test;
 const SALT: [u8; 16] = [
     49, 129, 3, 11, 159, 22, 1, 194, 94, 245, 142, 24, 21, 91, 99, 19,
 ];
+const JWT_LIFETIME: u64 = 86400; // seconds
+const JWT_SECRET: &str = "TODO";
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, PartialEq)]
 #[sqlx(type_name = "account_status", rename_all = "lowercase")]
@@ -79,7 +83,31 @@ impl Account {
         }
     }
 
-    pub(crate) fn create_access_token(&self) -> Value {
-        todo!()
+    pub(crate) fn create_access_token(&self) -> Result<String, ServiceError> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs();
+
+        let claim = JWTClaim {
+            sub: self.uuid.to_string(),
+            nbf: now,
+            exp: now + JWT_LIFETIME,
+        };
+        let header = Header::default(); // default HS256
+        let encoding_key = EncodingKey::from_secret(JWT_SECRET.as_bytes());
+
+        let jwt = encode(&header, &claim, &encoding_key).map_err(|err| {
+            eprintln!("jwt encode failed: {}", err);
+            ServiceError::JWTError(err.to_string())
+        })?;
+        Ok(jwt)
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct JWTClaim {
+    pub sub: String,
+    pub nbf: u64,
+    pub exp: u64,
 }

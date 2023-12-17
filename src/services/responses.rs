@@ -21,6 +21,7 @@ pub enum ServiceError {
     AuthenticationError(String),
     InvalidPassword(PasswordPolicy),
     HashLibError(String),
+    JWTError(String),
 }
 
 impl From<BaseError> for ServiceError {

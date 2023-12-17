@@ -25,6 +25,12 @@ impl IntoResponse for AxumError {
                 // TODO: pass error code to resp
                 (StatusCode::BAD_REQUEST, "invalid_password")
             }
+            ServiceError::HashLibError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "internal_server_error")
+            }
+            ServiceError::JWTError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "internal_server_error")
+            }
         };
 
         let body = Json(json!({"message":msg}));

@@ -91,7 +91,7 @@ impl<R: AccountRepository> AccountHandler<R> {
 
         account.verify_password(&cmd.password)?;
 
-        let token = account.create_access_token();
-        Ok(token.into())
+        let token = account.create_access_token()?;
+        Ok(ApplicationResponse::String(token))
     }
 }
