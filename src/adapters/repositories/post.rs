@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 
+use crate::services::post::query::ListCommunityPosts;
+use crate::services::post::repository::PostQueryRepository;
 use crate::{
     domains::post::{CommunityPost, PostCategory, PostStatus},
     services::{post::repository::PostCommandRepository, responses::BaseError},
 };
-use crate::services::post::query::ListCommunityPosts;
-use crate::services::post::repository::PostQueryRepository;
 
 use super::SqlRepository;
 
@@ -39,8 +39,8 @@ impl PostCommandRepository for SqlRepository {
             &aggregate.body,
             PostStatus::Created as PostStatus
         )
-            .fetch_one(self.transaction()?)
-            .await?;
+        .fetch_one(self.transaction()?)
+        .await?;
         Ok(rec.id)
     }
 
@@ -59,8 +59,8 @@ impl PostCommandRepository for SqlRepository {
             aggregate.updated_at,
             aggregate.id
         )
-            .execute(self.transaction()?)
-            .await?;
+        .execute(self.transaction()?)
+        .await?;
         Ok(())
     }
 }
@@ -80,7 +80,10 @@ impl PostQueryRepository for SqlRepository {
         )
     }
 
-    async fn list_posts(&self, query: &ListCommunityPosts) -> Result<Vec<CommunityPost>, BaseError> {
+    async fn list_posts(
+        &self,
+        query: &ListCommunityPosts,
+    ) -> Result<Vec<CommunityPost>, BaseError> {
         Ok(sqlx::query_as!(CommunityPost,
         r#"
             SELECT id, account_id, title, thumbnail, category AS "category!: PostCategory", body, status AS "status!: PostStatus", created_at, updated_at

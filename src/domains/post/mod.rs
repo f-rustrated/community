@@ -1,9 +1,9 @@
 pub mod commands;
 pub mod response;
 
+use crate::domains::post::commands::UpdatePost;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use crate::domains::post::commands::UpdatePost;
 
 use crate::services::responses::ServiceError;
 
@@ -42,7 +42,7 @@ impl CommunityPost {
     pub fn new(cmd: CreatePost) -> Self {
         Self {
             id: 0,
-            account_id: cmd.account_id.unwrap(),
+            account_id: cmd.account_id,
             title: cmd.title,
             thumbnail: cmd.thumbnail,
             category: PostCategory::Default,
@@ -70,4 +70,3 @@ impl CommunityPost {
         unimplemented!()
     }
 }
-

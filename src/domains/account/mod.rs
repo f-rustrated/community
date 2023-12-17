@@ -2,11 +2,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 pub mod response;
 use bcrypt;
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{encode, EncodingKey, Header, TokenData};
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
-use crate::services::responses::ServiceError;
+use crate::{config::config, services::responses::ServiceError};
 
 use self::commands::CreateAccount;
 
@@ -19,7 +19,6 @@ const SALT: [u8; 16] = [
     49, 129, 3, 11, 159, 22, 1, 194, 94, 245, 142, 24, 21, 91, 99, 19,
 ];
 const JWT_LIFETIME: u64 = 86400; // seconds
-const JWT_SECRET: &str = "TODO";
 
 #[derive(sqlx::Type, Debug, Serialize, Deserialize, PartialEq)]
 #[sqlx(type_name = "account_status", rename_all = "lowercase")]
@@ -92,7 +91,7 @@ impl Account {
             exp: now + JWT_LIFETIME,
         };
         let header = Header::default(); // default HS256
-        let encoding_key = EncodingKey::from_secret(JWT_SECRET.as_bytes());
+        let encoding_key = EncodingKey::from_secret(config().jwt_secret.as_bytes());
 
         encode(&header, &claim, &encoding_key).map_err(|err| {
             tracing::error!("jwt encode failed: {}", err);

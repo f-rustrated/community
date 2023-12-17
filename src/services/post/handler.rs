@@ -21,15 +21,13 @@ impl<R> PostHandler<R> {
     }
 }
 
+// 1. checking user context
+// 2. creating post
 impl<R: PostCommandRepository + TransactionUnitOfWork> PostHandler<R> {
     pub async fn create_post(
         &mut self,
         cmd: CreatePost,
     ) -> Result<ApplicationResponse, ServiceError> {
-        if (cmd.account_id.is_none()) {
-            return Err(ServiceError::UnAuthorized("account_id is required".to_string()));
-        }
-
         self.repo.begin().await?;
         let aggregate = CommunityPost::new(cmd);
         let res = self.repo.add(&aggregate).await?;
@@ -37,15 +35,12 @@ impl<R: PostCommandRepository + TransactionUnitOfWork> PostHandler<R> {
         Ok(ApplicationResponse::I64(res))
     }
 
-    pub async fn update_post(
-        &mut self,
-        cmd: UpdatePost,
-    ) -> Result<(), ServiceError> {
+    pub async fn update_post(&mut self, cmd: UpdatePost) -> Result<(), ServiceError> {
         self.repo.begin().await?;
         let mut aggregate = self.repo.get(cmd.id).await?;
         aggregate.update(cmd);
         self.repo.update(&aggregate).await?;
-        self.repo.commit().await?; 
+        self.repo.commit().await?;
         Ok(())
     }
 
@@ -72,7 +67,10 @@ impl<R: PostQueryRepository> PostHandler<R> {
     pub async fn get_post(&self, id: i64) -> Result<CommunityPost, ServiceError> {
         Ok(self.repo.get(id).await?)
     }
-    pub async fn list_posts(&self, query: ListCommunityPosts) -> Result<Vec<CommunityPost>, ServiceError> {
+    pub async fn list_posts(
+        &self,
+        query: ListCommunityPosts,
+    ) -> Result<Vec<CommunityPost>, ServiceError> {
         Ok(self.repo.list_posts(&query).await?)
     }
 }

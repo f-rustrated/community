@@ -1,10 +1,10 @@
 //TODO stuff fields in the following commands!
-
 use serde::Deserialize;
 
+// TODO implement request body separately in router?
 #[derive(Deserialize, Clone)]
 pub struct CreatePost {
-    pub account_id: Option<i64>,
+    pub account_id: i64,
     pub title: String,
     pub thumbnail: Option<String>,
     pub category: String,
@@ -36,6 +36,7 @@ pub mod helper {
     use super::{CreatePost, DeletePost, UpvotePost};
 
     pub fn create_post() -> CreatePost {
+        // CreatePost{ account_id: todo!(), title: todo!(), thumbnail: todo!(), category: todo!(), body: todo!() }
         todo!()
     }
 

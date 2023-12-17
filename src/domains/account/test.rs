@@ -11,7 +11,10 @@ pub fn account_create_helper(password: String, email: String) -> Result<Account,
 
 #[cfg(test)]
 pub mod account {
-    use crate::domains::account::{Account, CreateAccount, JWTClaim, JWT_SECRET};
+    use crate::{
+        config::config,
+        domains::account::{Account, CreateAccount, JWTClaim},
+    };
     use bcrypt;
     use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 
@@ -41,7 +44,7 @@ pub mod account {
         let token = account.create_access_token().unwrap();
 
         // then
-        let decoding_key = DecodingKey::from_secret(JWT_SECRET.as_bytes());
+        let decoding_key = DecodingKey::from_secret(config().jwt_secret.as_bytes());
         let decoded =
             decode::<JWTClaim>(&token, &decoding_key, &Validation::new(Algorithm::HS256)).unwrap();
         assert_eq!(decoded.claims.sub, account.uuid.to_string());

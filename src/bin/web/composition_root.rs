@@ -1,3 +1,7 @@
+use community::domains::post::commands::{CreatePost, DeletePost, UpdatePost};
+use community::domains::post::CommunityPost;
+use community::services::post::handler::PostHandler;
+use community::services::post::query::ListCommunityPosts;
 use community::{
     adapters::repositories::SqlRepository,
     domains::account::commands::{CreateAccount, SignInAccount},
@@ -6,10 +10,6 @@ use community::{
         responses::{ApplicationResponse, ServiceError},
     },
 };
-use community::domains::post::commands::{CreatePost, DeletePost, UpdatePost};
-use community::domains::post::CommunityPost;
-use community::services::post::handler::PostHandler;
-use community::services::post::query::ListCommunityPosts;
 
 pub struct CompositionRoot<T>(pub T);
 impl CompositionRoot<CreateAccount> {
@@ -52,7 +52,7 @@ impl CompositionRoot<DeletePost> {
 
 impl CompositionRoot<ListCommunityPosts> {
     pub async fn list_posts(self) -> Result<Vec<CommunityPost>, ServiceError> {
-        let mut handler = PostHandler::new(SqlRepository::new().await);
+        let handler = PostHandler::new(SqlRepository::new().await);
         handler.list_posts(self.0).await
     }
 }
