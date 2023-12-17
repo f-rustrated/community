@@ -65,7 +65,7 @@ pub mod account_handler {
     }
 
     #[tokio::test]
-    #[should_panic]
+    // #[should_panic]
     async fn test_sign_in_account_happy_case() {
         // given
         dotenv::dotenv().ok();
@@ -75,12 +75,11 @@ pub mod account_handler {
             email: name.to_string(),
             password: plain_password.to_string(),
         };
-        let repo = SqlRepository::new().await;
         let mut handler = AccountHandler::new(SqlRepository::new().await);
-        let Ok(ApplicationResponse::I64(account_id)) = handler.sign_up_account(create_cmd).await
-        else {
-            panic!("sign up failed");
-        };
+        handler
+            .sign_up_account(create_cmd)
+            .await
+            .expect("sign up failed");
 
         let sign_in_cmd = SignInAccount {
             email: name.to_string(),
@@ -88,12 +87,12 @@ pub mod account_handler {
         };
 
         // when
-        let Ok(ApplicationResponse::Json(token)) = handler.sign_in_account(sign_in_cmd).await
+        let Ok(ApplicationResponse::String(token)) = handler.sign_in_account(sign_in_cmd).await
         else {
             panic!("failed");
         };
 
         // then
-        assert!(token.is_object());
+        assert!(!token.is_empty());
     }
 }
