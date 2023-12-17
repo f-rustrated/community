@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 pub mod response;
 use bcrypt;
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -42,17 +41,15 @@ pub struct Account {
 }
 
 impl Account {
-    const ID_NOT_GENERATED: i64 = 0;
-
     pub(crate) fn new(cmd: &CreateAccount) -> Result<Self, ServiceError> {
         let hashed_password = Self::create_password(&cmd.password)?;
 
         Ok(Self {
-            id: Account::ID_NOT_GENERATED,
+            id: Default::default(),
             uuid: Uuid::new_v4(),
             name: cmd.email.to_string(),
             status: AccountStatus::Active,
-            hashed_password: hashed_password,
+            hashed_password,
             created_at: Utc::now(),
             updated_at: Utc::now(),
         })
@@ -97,11 +94,10 @@ impl Account {
         let header = Header::default(); // default HS256
         let encoding_key = EncodingKey::from_secret(JWT_SECRET.as_bytes());
 
-        let jwt = encode(&header, &claim, &encoding_key).map_err(|err| {
-            eprintln!("jwt encode failed: {}", err);
+        encode(&header, &claim, &encoding_key).map_err(|err| {
+            tracing::error!("jwt encode failed: {}", err);
             ServiceError::JWTError(err.to_string())
-        })?;
-        Ok(jwt)
+        })
     }
 }
 
