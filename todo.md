@@ -1,4 +1,4 @@
 - implement jwt extracting logic
 - implement user_context(where?)
 - finalize auth middleware
-- upgrade axum to 0.7.x
+- apply axum 0.7.x
