@@ -22,9 +22,9 @@ impl IntoResponse for AxumError {
             ServiceError::AuthenticationError(_) => {
                 (StatusCode::UNAUTHORIZED, "authentication_error")
             }
-            ServiceError::InvalidPassword(reason) => {
+            ServiceError::AccountError(_) => {
                 // TODO: pass error code to resp
-                (StatusCode::BAD_REQUEST, "invalid_password")
+                (StatusCode::BAD_REQUEST, "auth error")
             }
             ServiceError::HashLibError(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "internal_server_error")

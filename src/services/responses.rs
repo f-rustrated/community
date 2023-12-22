@@ -4,6 +4,7 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::domains::account::response::AccountResponse;
+use crate::domains::account::AccountError;
 use crate::domains::post::response::CommunityPostResponse;
 
 // TODO define service error for fallible service operation
@@ -21,7 +22,7 @@ pub enum ServiceError {
     BaseError(BaseError),
     UnAuthorized(String),
     AuthenticationError(String),
-    InvalidPassword(PasswordPolicy),
+    AccountError(AccountError),
     HashLibError(String),
     JWTError(String),
 }
@@ -31,14 +32,10 @@ impl From<BaseError> for ServiceError {
         ServiceError::BaseError(value)
     }
 }
-
-#[derive(Debug, Serialize, PartialEq, Eq)]
-pub enum PasswordPolicy {
-    NotEnoughChars = 1,
-    AtLeastOneLower = 2,
-    AtLeastOneUpper = 3,
-    AtLeastOneNumber = 4,
-    AtLeastOneSpecialChar = 5,
+impl From<AccountError> for ServiceError {
+    fn from(value: AccountError) -> Self {
+        Self::AccountError(value)
+    }
 }
 
 #[derive(Serialize)]

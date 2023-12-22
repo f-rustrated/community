@@ -6,7 +6,7 @@ pub struct addComment {
     pub target_id: String,
     // post, comment
     pub target_type: char,
-    pub message: String
+    pub message: String,
 }
 
 #[derive(Deserialize, Clone)]
@@ -15,10 +15,10 @@ pub struct saveComment {
     pub target_id: String,
     // post, comment
     pub target_type: char,
-    pub message: String
+    pub message: String,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct deleteComment {
-    pub id: Bigserial
+    pub id: Bigserial,
 }

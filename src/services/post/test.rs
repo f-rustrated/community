@@ -82,7 +82,7 @@ pub mod post_handler {
                 };
                 '_then: {
                     let repo = SqlRepository::new().await;
-                    let aggregate = repo.get(post_id).await.unwrap();
+                    let _aggregate = repo.get(post_id).await.unwrap();
 
                     // TODO check upvote number increased by 1
                 }

@@ -1,50 +1,18 @@
 use super::repository::AccountRepository;
 use crate::{
-    domains::account::{
-        commands::{CreateAccount, SignInAccount},
-        Account,
+    domains::{
+        account::{Account, CreateAccount, SignInAccount},
+        TAggregate,
     },
     services::{
         cross_cutting_traits::TransactionUnitOfWork,
-        responses::{ApplicationResponse, PasswordPolicy, ServiceError},
+        responses::{ApplicationResponse, ServiceError},
     },
 };
-use regex::Regex;
 
 #[derive(Clone)]
 pub struct AccountHandler<R> {
     repo: R,
-}
-
-const MIN_PASSWORD_LEN: usize = 8;
-
-pub(crate) fn validate_password(password: &str) -> Result<(), PasswordPolicy> {
-    if password.len() < MIN_PASSWORD_LEN {
-        return Err(PasswordPolicy::NotEnoughChars);
-    }
-
-    // TODO: compile regex once and reuse
-    let pattern = Regex::new(r#"[a-z]"#).unwrap();
-    if !pattern.is_match(password) {
-        return Err(PasswordPolicy::AtLeastOneLower);
-    }
-
-    let pattern = Regex::new(r#"[A-Z]"#).unwrap();
-    if !pattern.is_match(password) {
-        return Err(PasswordPolicy::AtLeastOneUpper);
-    }
-
-    let pattern = Regex::new(r#"\d"#).unwrap();
-    if !pattern.is_match(password) {
-        return Err(PasswordPolicy::AtLeastOneNumber);
-    }
-
-    let pattern = Regex::new(r#"[!@%^&*?_-]"#).unwrap();
-    if !pattern.is_match(password) {
-        return Err(PasswordPolicy::AtLeastOneSpecialChar);
-    }
-
-    Ok(())
 }
 
 impl<R> AccountHandler<R> {
@@ -61,15 +29,11 @@ impl<R: AccountRepository + TransactionUnitOfWork> AccountHandler<R> {
     ) -> Result<ApplicationResponse, ServiceError> {
         self.repo.begin().await?;
 
-        match validate_password(&cmd.password) {
-            Ok(_) => {}
-            Err(password_policy) => {
-                return Err(ServiceError::InvalidPassword(password_policy));
-            }
-        }
+        let mut account = Account::default();
 
-        let account = &Account::new(&cmd)?;
-        let account_id = self.repo.add(account).await?;
+        let events = account.handle(cmd.into())?;
+
+        let account_id = self.repo.add(&events).await?;
 
         self.repo.commit().await?;
 

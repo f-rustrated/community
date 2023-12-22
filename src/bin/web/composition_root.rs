@@ -1,10 +1,10 @@
+use community::domains::account::{CreateAccount, SignInAccount};
 use community::domains::post::commands::{CreatePost, DeletePost, UpdatePost};
 use community::domains::post::CommunityPost;
 use community::services::post::handler::PostHandler;
 use community::services::post::query::ListCommunityPosts;
 use community::{
     adapters::repositories::SqlRepository,
-    domains::account::commands::{CreateAccount, SignInAccount},
     services::{
         account::handlers::AccountHandler,
         responses::{ApplicationResponse, ServiceError},
