@@ -3,7 +3,8 @@ use serde::{de::DeserializeOwned, Serialize};
 pub mod account;
 
 pub mod post;
-
+#[cfg(test)]
+pub mod test;
 pub trait TAggregate: Default + Serialize + DeserializeOwned + Sync + Send {
     type Command;
     type Event: std::cmp::PartialEq + std::fmt::Debug;
