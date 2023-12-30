@@ -6,3 +6,6 @@ upgrade:
 
 downgrade:
 	sqlx migrate revert --database-url $(DATABASE_URL)
+
+migration:
+	sqlx migrate add -r ${title}
