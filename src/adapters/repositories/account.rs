@@ -2,11 +2,9 @@ use crate::{
     domains::account::{Account, AccountEvent, AccountStatus},
     services::{account::repository::AccountRepository, responses::BaseError},
 };
-use async_trait::async_trait;
 
 use super::SqlRepository;
 
-#[async_trait]
 impl AccountRepository for SqlRepository {
     async fn get(&self, id: i64) -> Result<Account, BaseError> {
         Ok(sqlx::query_as!(Account,

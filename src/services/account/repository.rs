@@ -1,17 +1,21 @@
-use async_trait::async_trait;
-
 use crate::{
     domains::account::{Account, AccountEvent},
     services::responses::BaseError,
 };
+use std::future::Future;
 
-#[async_trait]
 pub trait AccountRepository {
-    async fn get(&self, id: i64) -> Result<Account, BaseError>;
+    fn get(&self, id: i64) -> impl Future<Output = Result<Account, BaseError>> + Send;
 
-    async fn get_by_email(&self, email: String) -> Result<Account, BaseError>;
+    fn get_by_email(
+        &self,
+        email: String,
+    ) -> impl Future<Output = Result<Account, BaseError>> + Send;
 
-    async fn add(&mut self, account: &[AccountEvent]) -> Result<i64, BaseError>;
+    fn add(
+        &mut self,
+        account: &[AccountEvent],
+    ) -> impl Future<Output = Result<i64, BaseError>> + Send;
 
-    async fn update(&mut self, account: &Account) -> Result<(), BaseError>;
+    fn update(&mut self, account: &Account) -> impl Future<Output = Result<(), BaseError>> + Send;
 }
