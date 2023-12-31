@@ -82,7 +82,9 @@ mod account_repository_test {
             r#"
             TRUNCATE 
                 post,
-                account
+                account,
+                events,
+                snapshots
             CASCADE;
         "#
         )
