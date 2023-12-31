@@ -44,6 +44,12 @@ pub trait TEventStore<A: TAggregate>: Sync + Send {
             Ok(Self::AC::new(aggregate_id, aggregate, current_sequence))
         }
     }
+    fn commit(
+        &self,
+        events: Vec<A::Event>,
+        context: Self::AC,
+        metadata: std::collections::HashMap<String, String>,
+    ) -> impl std::future::Future<Output = Result<(), A::Error>> + Send;
 }
 
 pub trait TAggregateContext<A>
