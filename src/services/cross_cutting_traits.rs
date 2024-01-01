@@ -1,10 +1,7 @@
-use async_trait::async_trait;
-
 use super::responses::BaseError;
 
-#[async_trait]
 pub trait TransactionUnitOfWork {
-    async fn begin(&mut self) -> Result<(), BaseError>;
-    async fn commit(&mut self) -> Result<(), BaseError>;
-    async fn rollback(&mut self) -> Result<(), BaseError>;
+    fn begin(&mut self) -> impl std::future::Future<Output = Result<(), BaseError>> + Send;
+    fn commit(&mut self) -> impl std::future::Future<Output = Result<(), BaseError>> + Send;
+    fn rollback(&mut self) -> impl std::future::Future<Output = Result<(), BaseError>> + Send;
 }

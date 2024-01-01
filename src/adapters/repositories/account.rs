@@ -1,12 +1,15 @@
+use serde_json::json;
+
 use crate::{
-    domains::account::{Account, AccountEvent, AccountStatus},
+    domains::{
+        account::{Account, AccountEvent, AccountStatus},
+        TEvent,
+    },
     services::{account::repository::AccountRepository, responses::BaseError},
 };
-use async_trait::async_trait;
 
 use super::SqlRepository;
 
-#[async_trait]
 impl AccountRepository for SqlRepository {
     async fn get(&self, id: i64) -> Result<Account, BaseError> {
         Ok(sqlx::query_as!(Account,
@@ -34,23 +37,33 @@ impl AccountRepository for SqlRepository {
         )
     }
 
-    async fn add(&mut self, account: &[AccountEvent]) -> Result<i64, BaseError> {
-        todo!()
-        // let rec = sqlx::query!(
-        //     r#"
-        //     INSERT INTO account (uuid, name, status, hashed_password)
-        //     VALUES ($1, $2, $3, $4)
-        //     RETURNING id
-        // "#,
-        //     account.uuid,
-        //     &account.name,
-        //     AccountStatus::Active as AccountStatus,
-        //     &account.hashed_password
-        // )
-        // .fetch_one(self.transaction()?)
-        // .await?;
-
-        // Ok(rec.id)
+    async fn add(&mut self, events: &[AccountEvent]) -> Result<i64, BaseError> {
+        // TODO need for improvement as it the following could be simplified more into one that invokes async call once.
+        // TODO need to develope `event enveloper`
+        for event in events {
+            let _ = sqlx::query!(
+                r#"
+                INSERT INTO events (
+                    aggregate_type ,
+                    aggregate_id   ,
+                    sequence       ,
+                    event_type     ,
+                    event_version  ,
+                    payload        
+                )
+                VALUES ($1, $2, $3, $4, $5, $6)
+                "#,
+                "Account",
+                "1",
+                0,
+                event.event_type(),
+                event.event_version(),
+                json!(event),
+            )
+            .execute(self.pool)
+            .await;
+        }
+        Ok(1)
     }
 
     async fn update(&mut self, account: &Account) -> Result<(), BaseError> {
@@ -67,7 +80,9 @@ mod account_repository_test {
             r#"
             TRUNCATE 
                 post,
-                account
+                account,
+                events,
+                snapshots
             CASCADE;
         "#
         )
