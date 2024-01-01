@@ -30,4 +30,8 @@ impl TEvent for AccountEvent {
     fn event_version(&self) -> String {
         "0.1".to_string()
     }
+
+    fn aggregate_type(&self) -> String {
+        "Account".to_string()
+    }
 }

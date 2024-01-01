@@ -49,10 +49,9 @@ impl AccountRepository for SqlRepository {
                     sequence       ,
                     event_type     ,
                     event_version  ,
-                    payload        ,
-                    metadata          
+                    payload        
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 "#,
                 "Account",
                 "1",
@@ -60,7 +59,6 @@ impl AccountRepository for SqlRepository {
                 event.event_type(),
                 event.event_version(),
                 json!(event),
-                serde_json::Value::Object(serde_json::Map::new())
             )
             .execute(self.pool)
             .await;

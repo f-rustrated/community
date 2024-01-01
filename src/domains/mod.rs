@@ -5,9 +5,10 @@ pub mod account;
 pub mod post;
 #[cfg(test)]
 pub mod test;
+
 pub trait TAggregate: Default + Serialize + DeserializeOwned + Sync + Send {
     type Command;
-    type Event: std::cmp::PartialEq + std::fmt::Debug;
+    type Event: TEvent;
     type Error: std::error::Error;
 
     fn handle(&mut self, command: Self::Command) -> Result<Vec<Self::Event>, Self::Error>;
@@ -21,6 +22,7 @@ pub trait TEvent:
     fn event_type(&self) -> String;
     /// used for event upcasting.
     fn event_version(&self) -> String;
+    fn aggregate_type(&self) -> String;
 }
 
 pub trait TEventStore<A: TAggregate>: Sync + Send {
@@ -48,7 +50,6 @@ pub trait TEventStore<A: TAggregate>: Sync + Send {
         &self,
         events: Vec<A::Event>,
         context: Self::AC,
-        metadata: std::collections::HashMap<String, String>,
     ) -> impl std::future::Future<Output = Result<(), A::Error>> + Send;
 }
 
@@ -71,4 +72,18 @@ where
     pub aggregate: A,
     /// The last committed event sequence number for this aggregate instance.
     pub current_sequence: usize,
+}
+
+impl<A: TAggregate> TAggregateContext<A> for AggregateContext<A> {
+    fn aggregate(&self) -> &A {
+        &self.aggregate
+    }
+
+    fn new(aggregate_id: &str, aggregate: A, current_sequence: usize) -> Self {
+        Self {
+            aggregate_id: aggregate_id.to_string(),
+            aggregate,
+            current_sequence,
+        }
+    }
 }
